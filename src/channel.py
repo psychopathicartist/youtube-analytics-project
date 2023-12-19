@@ -14,16 +14,55 @@ class Channel:
         self.title = info['items'][0]['snippet']['title']
         self.description = info['items'][0]['snippet']['description']
         self.url = 'https://www.youtube.com/channel/' + self.channel_id
-        self.subscriber_count = info['items'][0]['statistics']['subscriberCount']
-        self.video_count = info['items'][0]['statistics']['videoCount']
-        self.view_count = info['items'][0]['statistics']['viewCount']
+        self.subscriber_count = int(info['items'][0]['statistics']['subscriberCount'])
+        self.video_count = int(info['items'][0]['statistics']['videoCount'])
+        self.view_count = int(info['items'][0]['statistics']['viewCount'])
+
+    def __str__(self) -> str:
+        """Возвращает информацию о канале для пользователя"""
+        return f'{self.title} ({self.url})'
+
+    def __add__(self, other) -> int:
+        """Возвращает результат от операции сложения количества
+        подписчиков двух каналов"""
+        return self.subscriber_count + other.subscriber_count
+
+    def __sub__(self, other) -> int:
+        """Возвращает результат от операции вычитания количества
+        подписчиков двух каналов"""
+        return self.subscriber_count - other.subscriber_count
+
+    def __lt__(self, other) -> bool:
+        """Возвращает результат от операции сравнения "меньше"
+        количества подписчиков двух каналов"""
+        return self.subscriber_count < other.subscriber_count
+
+    def __le__(self, other) -> bool:
+        """Возвращает результат от операции сравнения "меньше
+        или равно" количества подписчиков двух каналов"""
+        return self.subscriber_count <= other.subscriber_count
+
+    def __gt__(self, other) -> bool:
+        """Возвращает результат от операции сравнения "больше"
+        количества подписчиков двух каналов"""
+        return self.subscriber_count > other.subscriber_count
+
+    def __ge__(self, other) -> bool:
+        """Возвращает результат от операции сравнения "больше
+        или равно" количества подписчиков двух каналов"""
+        return self.subscriber_count >= other.subscriber_count
+
+    def __eq__(self, other) -> bool:
+        """Возвращает результат от операции сравнения "равно"
+        количества подписчиков двух каналов"""
+        return self.subscriber_count == other.subscriber_count
 
     def print_info(self) -> None:
         """Выводит в консоль информацию о канале."""
         channel = self.get_service().channels().list(id=self.channel_id, part='snippet,statistics').execute()
         print(channel)
 
-    def to_json(self, filename):
+    def to_json(self, filename) -> None:
         """Сохраняет в файл значения атрибутов экземпляра Channel"""
         data = self.get_service().channels().list(id=self.channel_id, part='snippet,statistics').execute()
         with open(filename, 'w') as file:
