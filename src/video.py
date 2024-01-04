@@ -3,21 +3,40 @@ from googleapiclient.discovery import build
 import os
 
 
+class IDError(Exception):
+    """Класс исключения при отсутствии видео с введенным id"""
+    def __init__(self):
+        self.message = 'Видео с таким id не существует.'
+
+    def __str__(self):
+        return self.message
+
+
 class Video:
     """Класс для видео"""
     def __init__(self, video_id: str) -> None:
         """Экземпляр инициализируется id видео. Дальше все данные будут подтягиваться по API"""
-        self.video_id = video_id
-        info_video = self.get_service().videos().list(part='snippet,statistics,contentDetails,topicDetails',
-                                                      id=self.video_id).execute()
-        self.video_title: str = info_video['items'][0]['snippet']['title']
-        self.video_url: str = 'https://www.youtube.com/watch?v=info_video' + self.video_id
-        self.view_count: int = info_video['items'][0]['statistics']['viewCount']
-        self.like_count: int = info_video['items'][0]['statistics']['likeCount']
+        try:
+            self.video_id = video_id
+            info_video = self.get_service().videos().list(part='snippet,statistics,contentDetails,topicDetails',
+                                                          id=self.video_id).execute()
+            if not info_video['items']:
+                raise IDError
+            else:
+                self.title: str = info_video['items'][0]['snippet']['title']
+                self.url: str = 'https://www.youtube.com/watch?v=info_video' + self.video_id
+                self.count: int = info_video['items'][0]['statistics']['viewCount']
+                self.like_count: int = info_video['items'][0]['statistics']['likeCount']
+        except IDError as error:
+            print(error.message)
+            self.title = None
+            self.url = None
+            self.count = None
+            self.like_count = None
 
     def __str__(self) -> str:
         """Возвращает информацию о видео для пользователя"""
-        return self.video_title
+        return self.title
 
     @staticmethod
     def get_service():
@@ -35,4 +54,4 @@ class PLVideo(Video):
 
     def __str__(self) -> str:
         """Возвращает информацию о плейлисте для пользователя"""
-        return self.video_title
+        return self.title
